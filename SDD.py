@@ -1,6 +1,4 @@
 import re
-import math
-import time
 from tkinter import *
 from Classes import *
 from PIL import Image, ImageDraw, ImageTk
@@ -9,8 +7,8 @@ from PIL import Image, ImageDraw, ImageTk
 # Searches for brackets
 def find_brackets(form):
     if '(' in form and ')' in form:
-        for g in range(len(form)):
-            if form[g] == ')':
+        for g, q in form:
+            if q == ')':
                 for j in range(g, -1, -1):
                     if form[j] == '(':
                         return [j, g]
@@ -242,7 +240,7 @@ def equation_out(data, add=''):
 
 # Calculate or render the value
 def calculate():
-    global rendered, prevRendered, formula, antialias_rendering
+    global rendered, formula, antialias_rendering
 
     # time1 = time.clock()
 
@@ -419,7 +417,7 @@ Button(buttons, text="del", font=('arial', 14), width=4, height=2, command=delet
 
 # Check button for graphing on/off
 def check_graph():
-    global graph_true, formula
+    global graph_true
 
     graph_true = not graph_true
 
