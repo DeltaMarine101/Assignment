@@ -22,10 +22,10 @@ def solve(form):
 
     try:
         # Convert float to fraction
-        for j in range(len(form)):
-            if type(form[j]) == Element:
-                temp = form[j].new()
-                if type(temp.value) == float:
+        for j, q in form:
+            if isinstance(q, Element):
+                temp = q.new()
+                if isinstance(temp.value, float):
                     den = 1
                     while temp.value % 1 != 0:
                         den *= 10
@@ -40,33 +40,33 @@ def solve(form):
         # Find functions eg. sin, cos, tan
         temp_map = list(Function.functions_map.keys())
         while any((j in temp_map) for j in form):
-            for h in range(len(form)):
-                if form[h] in temp_map:
-                    if type(form[h + 1]) != str:
-                        form = form[:h] + [Function(form[h + 1], form[h]).simplify()] + form[h + 2:]
+            for h, q in form:
+                if q in temp_map:
+                    if not isinstance(form[h + 1], str):
+                        form = form[:h] + [Function(form[h + 1], q).simplify()] + form[h + 2:]
                         break
 
         # Find powers
         while '^' in form:
-            for h in range(len(form)):
-                if form[h] == '^':
+            for h, q in form:
+                if q == '^':
                     form = form[:h - 1] + [(form[h - 1] ** form[h + 1]).simplify()] + form[h + 2:]
                     break
 
         # Find times and divide
         while '*' in form or '/' in form:
-            for h in range(len(form)):
-                if form[h] == '*':
+            for h, q in form:
+                if q == '*':
                     form = form[:h - 1] + [(form[h - 1] * form[h + 1]).simplify()] + form[h + 2:]
                     break
-                if form[h] == '/':
+                if q == '/':
                     form = form[:h - 1] + [(form[h - 1] / form[h + 1]).simplify()] + form[h + 2:]
                     break
 
         # Find addition
         while '+' in form:
-            for h in range(len(form)):
-                if form[h] == '+':
+            for h, q in form:
+                if q == '+':
                     form = form[:h - 1] + [(form[h - 1] + form[h + 1]).simplify()] + form[h + 2:]
                     break
 
@@ -176,7 +176,7 @@ def create_object():
         return len(tokens) != 0 and tokens[-1] == previous_value
 
     def previous_type_is(previous_type):
-        return len(tokens) != 0 and type(tokens[-1]) == previous_type
+        return len(tokens) != 0 and isinstance(tokens[-1], previous_type)
 
     def pre_elem_parenthesis():
         return previous_is(')') or previous_type_is(Element)
@@ -220,7 +220,6 @@ def create_object():
 
 # Display equation out
 def equation_out(data, add=''):
-    global decimal_value
     answerOut.configure(state="normal")
     answerOut.delete("1.0", END)
     if decimal_value:
@@ -243,7 +242,7 @@ def equation_out(data, add=''):
 
 # Calculate or render the value
 def calculate():
-    global graph_true, rendered, prevRendered, formula, antialias_rendering
+    global rendered, prevRendered, formula, antialias_rendering
 
     # time1 = time.clock()
 
@@ -270,7 +269,7 @@ def calculate():
                 if x in prevRendered.keys():
                     y = prevRendered[x]
                 else:
-                    if type(data) == str:
+                    if isinstance(data, str):
                         continue
                     y = data.new()
                     y.sub('x', x)
@@ -286,7 +285,7 @@ def calculate():
 
                     prevRendered[x] = y
 
-                if type(y) != Element:
+                if not isinstance(y, Element):
                     continue
 
                 if 'j' in str(y):
@@ -384,8 +383,8 @@ for i in range(9):
            bg='#65c050', activebackground='#80d575', cursor='hand2', borderwidth=0).grid(row=3 - (i // 3), column=i % 3)
 
 symbols = ['+', '-', '*', '/', 'sin', 'cos', '(', ')']
-for i in range(len(symbols)):
-    Button(buttons, text=symbols[i], font=('arial', 14), width=4, height=2,
+for i, v in symbols:
+    Button(buttons, text=v, font=('arial', 14), width=4, height=2,
            command=lambda j=i: add_formula(symbols[j]),
            bg='#65c050', activebackground='#80d575', cursor='hand2', borderwidth=0).grid(row=i // 2 + 1,
                                                                                          column=i % 2 + 3)
@@ -475,7 +474,7 @@ startPoint = (0, 0)
 
 # Moving canvas with mouse
 def motion(event):
-    global startPoint, center, rendered
+    global startPoint, center
     if startPoint != (0, 0):
 
         distance_x = (event.x - startPoint[0]) / zoom
@@ -501,7 +500,7 @@ def leave(event):
 
 
 def clicked(event):
-    global onCanvas, startPoint
+    global startPoint
     if onCanvas:
         startPoint = (event.x, event.y)
 
@@ -513,7 +512,7 @@ def released(event):
 
 # Zooming in and out using scroll wheel
 def scroll_zoom(event):
-    global zoom, rendered
+    global zoom
     if event.delta > 0:
         z = 2
     else:

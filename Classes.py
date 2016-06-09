@@ -487,10 +487,10 @@ class ExpressionM:
                     if b:
                         break
 
-            for i in range(len(temp)):
+            for i, v in enumerate(temp):
                 try:
-                    if isinstance(temp[i], Element):
-                        if temp[i].value == 1.0:
+                    if isinstance(v, Element):
+                        if v.value == 1.0:
                             temp.pop(i)
                             temp.insert(0, '')
                 except AttributeError:
@@ -641,14 +641,14 @@ class ExpressionA:
                 val = values.pop(0)
                 b = True
                 # Go through each element
-                for i in range(len(values)):
+                for i, v in enumerate(values):
                     # If the first value equals the current value
                     try:
                         temp_val1 = Element(abs(val.value))
-                        temp_val2 = Element(abs(values[i].value))
+                        temp_val2 = Element(abs(v.value))
                     except AttributeError:
                         temp_val1 = val
-                        temp_val2 = values[i]
+                        temp_val2 = v
                     if temp_val1 == temp_val2:
                         # Add coefficients
                         neg1 = 1
@@ -656,7 +656,7 @@ class ExpressionA:
                         try:
                             if val.value < 0:
                                 neg1 = -1
-                            if values[i].value < 0:
+                            if v.value < 0:
                                 neg2 = -1
                         except AttributeError:
                             pass
