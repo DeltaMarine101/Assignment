@@ -381,8 +381,8 @@ for i in range(9):
            bg='#65c050', activebackground='#80d575', cursor='hand2', borderwidth=0).grid(row=3 - (i // 3), column=i % 3)
 
 symbols = ['+', '-', '*', '/', 'sin', 'cos', '(', ')']
-for i in range(len(symbols)):
-    Button(buttons, text=symbols[i], font=('arial', 14), width=4, height=2,
+for i, v in enumerate(symbols):
+    Button(buttons, text=v, font=('arial', 14), width=4, height=2,
            command=lambda j=i: add_formula(symbols[j]),
            bg='#65c050', activebackground='#80d575', cursor='hand2', borderwidth=0).grid(row=i // 2 + 1,
                                                                                          column=i % 2 + 3)
