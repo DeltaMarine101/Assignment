@@ -11,13 +11,13 @@ def get_hcf(a, b):
 
 # Get the coefficient of a value
 def get_coefficient(val):
-    if type(val) == Power:
+    if isinstance(val, Power):
         return 1.0
     else:
         temp = val.factors()
         hf = 0.0
         for i in temp:
-            if type(i) == float:
+            if isinstance(i, float):
                 if abs(i) >= abs(hf):
                     hf = i
         if hf == 0:
@@ -29,13 +29,13 @@ def get_coefficient(val):
 # val
 class Element:
     def __init__(self, val):
-        if type(val) == int:
+        if isinstance(val, int):
             val = float(val)
         self.value = val
 
     # Return the factors of the element
     def factors(self):
-        if type(self.value) == float:
+        if isinstance(self.value, float):
             if self.value % 1 == 0:
                 fact = set()
                 temp = abs(self.value)
@@ -53,7 +53,7 @@ class Element:
 
     # Simplify
     def simplify(self):
-        if type(self.value) == Element:
+        if isinstance(self.value, Element):
             return self.value
         else:
             return self.new()
@@ -73,15 +73,15 @@ class Element:
 
     # Solve as decimal
     def force_solve(self):
-        if type(self.value) == Element:
+        if isinstance(self.value, Element):
             return self.value
         else:
             return self
 
     # Addition operator handling
     def __add__(self, other):
-        if type(other) == Element:
-            if type(other.value) == float and type(self.value) == float:
+        if isinstance(other, Element):
+            if isinstance(other.value, float) and isinstance(self.value, float):
                 return Element(other.value + self.value)
             else:
                 return ExpressionA((self, other)).simplify()
@@ -91,8 +91,8 @@ class Element:
     # Multiplication operator handling
     def __mul__(self, other):
         # If element
-        if type(other) == Element:
-            if type(other.value) == float and type(self.value) == float:
+        if isinstance(other, Element):
+            if isinstance(other.value, float) and isinstance(self.value, float):
                 return Element(other.value * self.value)
             elif other.value == self.value:
                 return Power(self.value, Element(2.0))
@@ -100,8 +100,8 @@ class Element:
                 return ExpressionM((self, other))
 
         # If Power
-        elif type(other) == Power:
-            if type(other.base) == Element:
+        elif isinstance(other, Power):
+            if isinstance(other.base, Element):
                 if other.base.value == self.value:
                     return Power(self, other.power + Element(1.0)).simplify()
                 else:
@@ -110,30 +110,30 @@ class Element:
                 return ExpressionM((self, other))
 
         # If ExpressionM
-        elif type(other) == ExpressionM:
+        elif isinstance(other, ExpressionM):
             return ExpressionM((self, other)).simplify()
 
         # If ExpressionA
-        elif type(other) == ExpressionA:
+        elif isinstance(other, ExpressionA):
             out_array = []
             for i in other.value:
                 out_array.append(i * self)
             return ExpressionA(out_array).simplify()
 
         # If fraction
-        elif type(other) == Fraction:
+        elif isinstance(other, Fraction):
             return Fraction(other.numerator * self, other.denominator).simplify()
 
         # If function
-        elif type(other) == Function:
+        elif isinstance(other, Function):
             return (other * self).simplify()
 
     # Division operator handling
     def __truediv__(self, other):
-        if type(other) == Element:
+        if isinstance(other, Element):
             hcf = get_hcf(self.factors(), other.factors())
             if hcf != '':
-                if type(other.value) == float and type(self.value) == float:
+                if isinstance(other.value, float) and isinstance(self.value, float):
                     if (self.value / other.value) % 1 == 0:
                         return Element(self.value / other.value)
                     else:
@@ -152,7 +152,7 @@ class Element:
 
     # Equality handling
     def __eq__(self, other):
-        if type(other) == Element:
+        if isinstance(other, Element):
             return self.value == other.value
         else:
             return False
@@ -222,8 +222,8 @@ class Function:
     # Solve
     def solve(self):
         temp = self.value.force_solve()
-        if type(temp) == Element:
-            if type(temp.value) == float:
+        if isinstance(temp, Element):
+            if isinstance(temp.value, float):
                 if self.functions_map[self.type](temp.value) % 1 == 0:
                     return Element(self.functions_map[self.type](temp.value))
                 else:
@@ -235,8 +235,8 @@ class Function:
     # Solve as decimal
     def force_solve(self):
         temp = self.value.force_solve()
-        if type(temp) == Element:
-            if type(temp.value) == float:
+        if isinstance(temp, Element):
+            if isinstance(temp.value, float):
                 return Element(self.functions_map[self.type](temp.value))
             else:
                 return Function(self.value.force_solve(), self.type)
@@ -244,7 +244,7 @@ class Function:
 
     # Addition operator handling
     def __add__(self, other):
-        if type(other) == Function:
+        if isinstance(other, Function):
             if other.type == self.type and other.value == self.value:
                 return ExpressionM((Element(2.0), self))
             else:
@@ -254,7 +254,7 @@ class Function:
 
     # Multiplication operator handling
     def __mul__(self, other):
-        if type(other) == Function:
+        if isinstance(other, Function):
             if other == self:
                 return Power(self, Element(2.0))
             else:
@@ -264,7 +264,7 @@ class Function:
 
     # Divide operator handling
     def __truediv__(self, other):
-        if type(other) == Function:
+        if isinstance(other, Function):
             if other == self:
                 return Element(1.0)
         return Fraction(self, other).simplify()
@@ -275,7 +275,7 @@ class Function:
 
     # Equality handling
     def __eq__(self, other):
-        if type(other) == Function:
+        if isinstance(other, Function):
             return self.value.simplify() == other.value.simplify() and self.type == other.type
         else:
             return False
@@ -288,19 +288,19 @@ class Function:
 # val ^ val
 class Power:
     def __init__(self, val, p):
-        if type(val) == float or type(val) == str:
+        if isinstance(val, float) or isinstance(val, str):
             self.base = Element(val)
         else:
             self.base = val
-        if type(p) == float or type(p) == str:
+        if isinstance(p, float) or isinstance(p, str):
             self.power = Element(p)
         else:
             self.power = p
 
     # Returns factors
     def factors(self):
-        if type(self.power) == Element:
-            if type(self.power.value) == float:
+        if isinstance(self.power, Element):
+            if isinstance(self.power.value, float):
                 if self.power.value < 1:
                     return []
         return self.base.factors()
@@ -311,7 +311,7 @@ class Power:
         self.base = self.base.simplify()
         self.power = self.power.simplify()
 
-        if type(self.power) == Element:
+        if isinstance(self.power, Element):
             # To the power of 0
             if self.power.value == 0:
                 return Element(1.0)
@@ -322,11 +322,11 @@ class Power:
             elif self.power.value == -1:
                 return Fraction(Element(1.0), self.base)
             # To the power of a negative
-            elif type(self.power.value) == float:
+            elif isinstance(self.power.value, float):
                 if self.power.value < 0:
                     return Fraction(Element(1.0), Power(self.base, Element(-self.power.value)))
 
-        if type(self.power) == Fraction:
+        if isinstance(self.power, Fraction):
             # To the power of 0.5
             if self.power.numerator == 1 and self.power.numerator == 2:
                 return Function(self.base, '√')
@@ -335,8 +335,8 @@ class Power:
                 return Fraction(Element(1.0), Function(self.base, '√'))
 
         # If base ^ power is an exact value
-        if type(self.base) == Element and type(self.power) == Element:
-            if type(self.base.value) == float and type(self.power.value) == float:
+        if isinstance(self.base, Element) and isinstance(self.power, Element):
+            if isinstance(self.base.value, float) and isinstance(self.power.value, float):
                 if (self.base.value ** self.power.value) % 1 == 0:
                     return Element(self.base.value ** self.power.value)
                 else:
@@ -363,8 +363,8 @@ class Power:
     def force_solve(self):
         temp_base = self.base.force_solve()
         temp_power = self.power.force_solve()
-        if type(temp_base) == Element and type(temp_power) == Element:
-            if type(temp_base.value) == float and type(temp_power.value) == float:
+        if isinstance(temp_base, Element) and isinstance(temp_power, Element):
+            if isinstance(temp_base.value, float) and isinstance(temp_power.value, float):
                 return Element(temp_base.value ** temp_power.value)
             else:
                 return self.solve()
@@ -373,7 +373,7 @@ class Power:
 
     # Addition operator handling
     def __add__(self, other):
-        if type(other) == Power:
+        if isinstance(other, Power):
             if other == self:
                 return ExpressionM((Element(2.0), self))
             else:
@@ -384,36 +384,36 @@ class Power:
     # Multiplication operator handling
     def __mul__(self, other):
         # If element
-        if type(other) == Element:
+        if isinstance(other, Element):
             return other * self
 
         # If power
-        elif type(other) == Power:
+        elif isinstance(other, Power):
             return other * self
 
         # If ExpressionM
-        elif type(other) == ExpressionM:
+        elif isinstance(other, ExpressionM):
             return ExpressionM((self, other)).simplify()
 
         # If ExpressionA
-        elif type(other) == ExpressionA:
+        elif isinstance(other, ExpressionA):
             out_array = []
             for i in other.value:
                 out_array.append(i * self)
             return ExpressionA(out_array).simplify()
 
         # If fraction
-        elif type(other) == Fraction:
+        elif isinstance(other, Fraction):
             return Fraction(other.numerator * self, other.denominator).simplify()
 
         # If function
-        elif type(other) == Function:
+        elif isinstance(other, Function):
             return (other * self).simplify()
 
     # Divide operator handling
     def __truediv__(self, other):
-        if type(other) == Element:
-            if type(self.base) == Element:
+        if isinstance(other, Element):
+            if isinstance(self.base, Element):
                 if self.base.value == other.value:
                     return Power(Element(self.base), self.power + Element(-1.0)).simplify()
                 else:
@@ -430,7 +430,7 @@ class Power:
 
     # Equality handling
     def __eq__(self, other):
-        if type(other) == Power:
+        if isinstance(other, Power):
             return self.base == other.base and self.power == other.power
         else:
             return False
@@ -445,7 +445,7 @@ class ExpressionM:
     def __init__(self, val):
         self.value = []
         for i in val:
-            if type(i) == ExpressionM:
+            if isinstance(i, ExpressionM):
                 for j in i.value:
                     self.value.append(j)
             else:
@@ -471,8 +471,8 @@ class ExpressionM:
                 b = False
                 for j in range(i+1, len(temp)):
                     # Multiply together
-                    if type(temp[i]) == Element and type(temp[j]) == Element:
-                        if type(temp[i].value) == float and type(temp[j].value) == float:
+                    if isinstance(temp[i], Element) and isinstance(temp[j], Element):
+                        if isinstance(temp[i].value, float) and isinstance(temp[j].value, float):
                             temp[i] = temp[i] * temp[j]
                             temp.pop(j)
                             break
@@ -489,7 +489,7 @@ class ExpressionM:
 
             for i in range(len(temp)):
                 try:
-                    if type(temp[i]) == Element:
+                    if isinstance(temp[i], Element):
                         if temp[i].value == 1.0:
                             temp.pop(i)
                             temp.insert(0, '')
@@ -535,35 +535,35 @@ class ExpressionM:
     # Multiplication operator handling
     def __mul__(self, other):
         # If element
-        if type(other) == Element:
+        if isinstance(other, Element):
             return ExpressionM((self, other)).simplify()
 
         # If power
-        elif type(other) == Power:
+        elif isinstance(other, Power):
             return ExpressionM((self, other)).simplify()
 
         # If expressionM
-        elif type(other) == ExpressionM:
+        elif isinstance(other, ExpressionM):
             return ExpressionM((self, other)).simplify()
 
         # If expressionA
-        elif type(other) == ExpressionA:
+        elif isinstance(other, ExpressionA):
             out_array = []
             for i in other.value:
                 out_array.append(i * self)
             return ExpressionA(out_array).simplify()
 
         # If fraction
-        elif type(other) == Fraction:
+        elif isinstance(other, Fraction):
             return Fraction(other.numerator * self, other.denominator)
 
         # If function
-        elif type(other) == Function:
+        elif isinstance(other, Function):
             return (other * self).simplify()
 
     # Divide operator handling
     def __truediv__(self, other):
-        if type(other) == Element:
+        if isinstance(other, Element):
             for i in range(len(self.value)):
                 if other.value in self.value[i].factors():
                     self.value[i] = self.value[i] / other
@@ -582,7 +582,7 @@ class ExpressionM:
 
     # Equality handling
     def __eq__(self, other):
-        if type(other) == ExpressionM:
+        if isinstance(other, ExpressionM):
             return self.value == other.value
         else:
             return False
@@ -597,7 +597,7 @@ class ExpressionA:
     def __init__(self, val):
         self.value = []
         for i in val:
-            if type(i) == ExpressionA:
+            if isinstance(i, ExpressionA):
                 for j in i.value:
                     self.value.append(j)
             else:
@@ -706,7 +706,7 @@ class ExpressionA:
 
     # Multiplication operator handling
     def __mul__(self, other):
-        if type(other) == Fraction:
+        if isinstance(other, Fraction):
             Fraction(self * other.numerator, other.denominator).simplify()
         else:
             out_array = []
@@ -716,7 +716,7 @@ class ExpressionA:
 
     # Divide operator handling
     def __truediv__(self, other):
-        if type(other) == Element:
+        if isinstance(other, Element):
             if other.value in self.factors():
                 out_array = []
                 for i in self.value:
@@ -733,7 +733,7 @@ class ExpressionA:
 
     # Equality handling
     def __eq__(self, other):
-        if type(other) == ExpressionA:
+        if isinstance(other, ExpressionA):
             return self.value == other.value
         else:
             return False
@@ -759,11 +759,11 @@ class Fraction:
         temp = Fraction(self.numerator.simplify(), self.denominator.simplify())
 
         # Combine the numerator fraction
-        if type(temp.numerator) == Fraction:
+        if isinstance(temp.numerator, Fraction):
             temp = Fraction(temp.numerator.numerator, temp.denominator * temp.numerator.denominator)
 
         # Combine the denominator fraction
-        if type(temp.denominator) == Fraction:
+        if isinstance(temp.denominator, Fraction):
             temp = Fraction(temp.numerator * temp.denominator.denominator, temp.denominator.numerator)
 
         # If top equals bottom
@@ -774,7 +774,7 @@ class Fraction:
             # Divide the top and bottom by the highest common factor
             hcf = get_hcf(temp.numerator.factors(), temp.denominator.factors())
             if hcf == '' or hcf == 1.0:
-                if type(temp.denominator) == Element:
+                if isinstance(temp.denominator, Element):
                     if temp.denominator.value == 1:
                         return temp.numerator
                 return temp
@@ -801,8 +801,8 @@ class Fraction:
         temp_den = self.denominator.force_solve()
 
         # Force solve fraction
-        if type(temp_num) == Element and type(temp_num) == Element:
-            if type(temp_num.value) == float and type(temp_den.value) == float:
+        if isinstance(temp_num, Element) and isinstance(temp_num, Element):
+            if isinstance(temp_num.value, float) and isinstance(temp_den.value, float):
                 return Element(temp_num.value / temp_den.value)
             else:
                 return temp_num / temp_den
@@ -811,7 +811,7 @@ class Fraction:
 
     # Addition operator handling
     def __add__(self, other):
-        if type(other) == Fraction:
+        if isinstance(other, Fraction):
             return Fraction((self.numerator * other.denominator) + (other.numerator * self.denominator),
                             self.denominator * other.denominator).simplify()
         else:
@@ -819,7 +819,7 @@ class Fraction:
 
     # Multiplication operator handling
     def __mul__(self, other):
-        if type(other) == Fraction:
+        if isinstance(other, Fraction):
             return Fraction(self.numerator * other.numerator, self.denominator * other.denominator).simplify()
         else:
             return other * self
@@ -834,7 +834,7 @@ class Fraction:
 
     # Equality handling
     def __eq__(self, other):
-        if type(other) == Fraction:
+        if isinstance(other, Fraction):
             return self.numerator == other.numerator and self.denominator == other.denominator
         else:
             return False

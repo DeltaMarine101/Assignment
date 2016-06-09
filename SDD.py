@@ -280,7 +280,6 @@ def calculate():
                     try:
                         # Solve the equation
                         y = y.force_solve().simplify()
-                        pass
 
                     except (ValueError, ZeroDivisionError, AttributeError):
                         continue
