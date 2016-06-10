@@ -311,28 +311,27 @@ class Power:
         self.base = self.base.simplify()
         self.power = self.power.simplify()
 
-        if isinstance(self.power, Element):
+        solve = self.power.force_solve()
+        if isinstance(solve, Element):
             # To the power of 0
-            if self.power.value == 0:
+            if solve.value == 0:
                 return Element(1.0)
             # To the power of 1
-            elif self.power.value == 1:
+            elif solve.value == 1:
                 return self.base
+            # To the power of 0.5
+            elif solve.value == 0.5:
+                return Function(self.base, '√')
             # To the power of -1
-            elif self.power.value == -1:
+            elif solve.value == -1:
                 return Fraction(Element(1.0), self.base)
+            # To the power of -0.5
+            elif solve.value == -0.5:
+                return Fraction(Element(1.0), Function(self.base, '√'))
             # To the power of a negative
             elif isinstance(self.power.value, float):
                 if self.power.value < 0:
                     return Fraction(Element(1.0), Power(self.base, Element(-self.power.value)))
-
-        if isinstance(self.power, Fraction):
-            # To the power of 0.5
-            if self.power.numerator == 1 and self.power.numerator == 2:
-                return Function(self.base, '√')
-            # To the power of -0.5
-            elif self.power.numerator == -1 and self.power.numerator == 2:
-                return Fraction(Element(1.0), Function(self.base, '√'))
 
         # If base ^ power is an exact value
         if isinstance(self.base, Element) and isinstance(self.power, Element):
@@ -815,7 +814,8 @@ class Fraction:
             return Fraction((self.numerator * other.denominator) + (other.numerator * self.denominator),
                             self.denominator * other.denominator).simplify()
         else:
-            return ExpressionA((self, other)).simplify()
+            return Fraction(self.numerator + (other * self.denominator), self.denominator).simplify()
+            #return ExpressionA((self, other)).simplify()
 
     # Multiplication operator handling
     def __mul__(self, other):

@@ -1,13 +1,17 @@
 import re
 from tkinter import *
 from Classes import *
-from PIL import Image, ImageDraw, ImageTk
+try:
+    from PIL import Image, ImageDraw, ImageTk
+    pil = True
+except ImportError:
+    pil = False
 
 
 # Searches for brackets
 def find_brackets(form):
     if '(' in form and ')' in form:
-        for g, q in form:
+        for g, q in enumerate(form):
             if q == ')':
                 for j in range(g, -1, -1):
                     if form[j] == '(':
@@ -20,7 +24,7 @@ def solve(form):
 
     try:
         # Convert float to fraction
-        for j, q in form:
+        for j, q in enumerate(form):
             if isinstance(q, Element):
                 temp = q.new()
                 if isinstance(temp.value, float):
@@ -38,7 +42,7 @@ def solve(form):
         # Find functions eg. sin, cos, tan
         temp_map = list(Function.functions_map.keys())
         while any((j in temp_map) for j in form):
-            for h, q in form:
+            for h, q in enumerate(form):
                 if q in temp_map:
                     if not isinstance(form[h + 1], str):
                         form = form[:h] + [Function(form[h + 1], q).simplify()] + form[h + 2:]
@@ -46,14 +50,14 @@ def solve(form):
 
         # Find powers
         while '^' in form:
-            for h, q in form:
+            for h, q in enumerate(form):
                 if q == '^':
                     form = form[:h - 1] + [(form[h - 1] ** form[h + 1]).simplify()] + form[h + 2:]
                     break
 
         # Find times and divide
         while '*' in form or '/' in form:
-            for h, q in form:
+            for h, q in enumerate(form):
                 if q == '*':
                     form = form[:h - 1] + [(form[h - 1] * form[h + 1]).simplify()] + form[h + 2:]
                     break
@@ -63,7 +67,7 @@ def solve(form):
 
         # Find addition
         while '+' in form:
-            for h, q in form:
+            for h, q in enumerate(form):
                 if q == '+':
                     form = form[:h - 1] + [(form[h - 1] + form[h + 1]).simplify()] + form[h + 2:]
                     break
@@ -263,10 +267,11 @@ def calculate():
             for x in range(-radius, radius + 2):
                 x = (x / zoom) - center[0]
 
-                # Render and store value in cache
                 if x in prevRendered.keys():
+                    # If value is stored in cache, use it
                     y = prevRendered[x]
                 else:
+                    # Render and store value in cache
                     if isinstance(data, str):
                         continue
                     y = data.new()
@@ -281,6 +286,7 @@ def calculate():
                     except (ValueError, ZeroDivisionError, AttributeError):
                         continue
 
+                    # Store in cache
                     prevRendered[x] = y
 
                 if not isinstance(y, Element):
@@ -296,7 +302,7 @@ def calculate():
                     y = (y - center[1]) * zoom
                     x = (x + center[0]) * zoom
 
-                    if antialias_rendering:
+                    if antialias_rendering and pil:
                         # Smooth
                         if not (abs(resize - y) < radius and abs(resize - float(last_y)) < radius) and \
                                         abs(float(last_y) - y) < radius*2+1:
@@ -317,7 +323,7 @@ def calculate():
                 last_y = y
 
             del draw
-            if antialias_rendering:
+            if antialias_rendering and pil:
                 # Resize rendered image to get antialiasing
                 image = ImageTk.PhotoImage(image.resize((radius * 2, radius * 2), Image.LINEAR))
 
