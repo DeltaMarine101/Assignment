@@ -5,4 +5,4 @@ This was made for python 3.4 and is untested for other versions. The project is 
 
 ## Installation
 
-Run the pillow install .exe in the Resources folder or use pip.
+Run the pillow install .exe in the 'resources' folder or use pip to install python pillow.
