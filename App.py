@@ -15,7 +15,7 @@ def find_brackets(form):
             if q == ')':
                 for j in range(g, -1, -1):
                     if form[j] == '(':
-                        return [j, g]
+                        return (j, g)
     else:
         return False
 
@@ -35,8 +35,8 @@ def solve(form):
                     form[j] = Fraction(temp, Element(den)).simplify()
 
         # Solve brackets ( and )
-        while find_brackets(form):
-            index = find_brackets(form)
+        index = find_brackets(form)
+        while index:
             form = form[:index[0]] + [solve(form[index[0] + 1:index[1]])] + form[index[1] + 1:]
 
         # Find functions eg. sin, cos, tan
@@ -74,7 +74,7 @@ def solve(form):
 
         return form[0]
 
-    except (ValueError, IndexError, ZeroDivisionError, TypeError, AttributeError):
+    except Exception:
         return 'Error'
 
 # View control variables
@@ -117,26 +117,26 @@ formulaOut.grid(column=0, row=1)
 
 
 # Draw the cartesian plane
-def draw_plane(color='#65c050'):
+def draw_plane(bg_color='#65C050', color='#DDD'):
     viewport.delete("all")
-    viewport.create_rectangle(radius + center[0] * zoom, 0, radius + center[0] * zoom, radius * 2 + 1, fill=color,
-                              outline=color)
-    viewport.create_rectangle(0, radius + center[1] * zoom, radius * 2 + 1, radius + center[1] * zoom, fill=color,
-                              outline=color)
+    viewport.create_rectangle(radius + center[0] * zoom, 0, radius + center[0] * zoom, radius * 2 + 1,
+                            fill=bg_color, outline=bg_color)
+    viewport.create_rectangle(0, radius + center[1] * zoom, radius * 2 + 1, radius + center[1] * zoom,
+                            fill=bg_color, outline=color)
 
     # Draw scale numbers
     # Top
     viewport.create_text(radius + center[0] * zoom - 15, 8,
-                         text=str(round((radius+zoom*center[1])/zoom, 2)), fill='#DDD')
+                         text=str(round((radius+zoom*center[1])/zoom, 2)), fill=color)
     # Bottom
     viewport.create_text(radius + center[0] * zoom - 15, radius*2-5,
-                         text=str(-round((radius-zoom*center[1])/zoom, 2)), fill='#DDD')
+                         text=str(-round((radius-zoom*center[1])/zoom, 2)), fill=color)
     # Left
     viewport.create_text(20, radius + center[1] * zoom-10,
-                         text=str(-round((radius+zoom*center[0])/zoom, 2)), fill='#DDD')
+                         text=str(-round((radius+zoom*center[0])/zoom, 2)), fill=color)
     # Right
     viewport.create_text(radius*2-20, radius + center[1] * zoom-10,
-                         text=str(round((radius-zoom*center[0])/zoom, 2)), fill='#DDD')
+                         text=str(round((radius-zoom*center[0])/zoom, 2)), fill=color)
 
 
 # Draw lines between the 2 points
